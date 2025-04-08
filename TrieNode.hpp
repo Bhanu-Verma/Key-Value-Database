@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <cassert>
+#include <optional>
 
 namespace DB{
 
@@ -17,11 +18,13 @@ namespace DB{
 
         TrieNode* getChild(char c);
 
-        bool hasChild();
+        bool hasChild() const ;
 
-        bool hasValue();
+        bool hasValue() const;
 
         void removeChild(char c);
+
+        std::optional<std::string> getValue() const ;
         
     private:
         std::string m_value{};

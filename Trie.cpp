@@ -48,3 +48,30 @@ bool DB::Trie::remove(std::string_view key){
     return true;
 }
 
+std::optional<std::string> DB::Trie::get(std::string key) const
+{
+    TrieNode* cur{head};
+    for(auto i : key){
+        if(cur->getChild(i)){
+            cur = cur->getChild(i);
+        }
+        else{
+            return std::nullopt;
+        }
+    }
+    return cur->getValue();
+}
+
+bool DB::Trie::exists(std::string_view key) const {
+    TrieNode* cur{head};
+    for(auto i : key){
+        if(cur->getChild(i)){
+            cur = cur->getChild(i);
+        }
+        else{
+            return false;
+        }
+    }
+    return cur->hasValue();
+}
+
