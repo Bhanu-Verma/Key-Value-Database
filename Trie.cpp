@@ -34,7 +34,7 @@ bool DB::Trie::remove(std::string_view key){
     }
     cur->updateValue();
     if(!(cur->hasChild())){
-        while(st.size()){
+        while(!st.empty()){
             auto p{st.top()};
             st.pop();
             p.second->removeChild(p.first);
