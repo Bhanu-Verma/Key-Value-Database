@@ -27,6 +27,7 @@ namespace DB{
         std::optional<std::string> getValue() const ;
         
     private:
+    
         std::string m_value{};
         std::unordered_map<char, TrieNode*>m_child;
 
