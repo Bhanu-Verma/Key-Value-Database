@@ -22,6 +22,7 @@ bool DB::TrieNode::hasValue() const {
 
 void DB::TrieNode::removeChild(char c){
     if(m_child.find(c) != m_child.end()){
+        delete m_child[c];
         m_child.erase(c);
     }
 }
