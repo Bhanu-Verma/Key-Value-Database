@@ -24,6 +24,7 @@ namespace DB{
         void removeChild(char c);
         
     private:
+    
         std::string m_value{};
         std::unordered_map<char, TrieNode*>m_child;
 
