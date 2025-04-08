@@ -34,15 +34,13 @@ bool DB::Trie::remove(std::string_view key){
     }
     cur->updateValue();
     if(!(cur->hasChild())){
-        delete cur;
-        while(true){
+        while(st.size()){
             auto p{st.top()};
             st.pop();
             p.second->removeChild(p.first);
-            if(st.empty() || p.second->hasChild() || p.second->hasValue()){
+            if(p.second->hasChild() || p.second->hasValue()){
                 break;
             }
-            delete p.second;
         }
     }
     return true;
