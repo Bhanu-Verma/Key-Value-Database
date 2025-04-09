@@ -15,7 +15,7 @@ using namespace std;
 
 namespace DB{
     struct TrieNode {
-        std::string value{};
+        int id;
         bool isEndOfWord{};
         std::unordered_map<char, shared_ptr<TrieNode>> children{};
 
@@ -26,22 +26,21 @@ namespace DB{
 
     class PersistentTrie {
     private: 
+        std::vector<std::string> m_storage;
         vector<shared_ptr<TrieNode>> versions;
         shared_ptr<TrieNode> currentRoot;
         mutable std::shared_mutex sh_mtx;
 
 
-        shared_ptr<TrieNode> insert(shared_ptr<TrieNode> node, const string &word, int index, std::string_view val) {
-
-
-
+        shared_ptr<TrieNode> insert(shared_ptr<TrieNode> node, const string &word, int index, const std::string& val) {
             if (!node) node = make_shared<TrieNode>();
-
-            shared_ptr<TrieNode> newNode = make_shared<TrieNode>(*node); // copy current node
+            shared_ptr<TrieNode> newNode = make_shared<TrieNode>(*node); 
 
             if (index == word.size()) {
+                // put the word in storage 
+                m_storage.push_back(val);
                 newNode->isEndOfWord = true;
-                newNode->value = val;
+                newNode->id = m_storage.size() - 1;
                 return newNode;
             }
 
@@ -58,17 +57,13 @@ namespace DB{
         }
 
         shared_ptr<TrieNode> remove(shared_ptr<TrieNode> node, const string &key, int index) {
+            if (!node) return nullptr;       
+            shared_ptr<TrieNode> newNode = make_shared<TrieNode>(*node);
 
-
-
-            if (!node) return nullptr;
-        
-            shared_ptr<TrieNode> newNode = make_shared<TrieNode>(*node); // copy for persistence
-        
             if (index == key.size()) {
                 if (!newNode->isEndOfWord) return newNode; // key doesn't exist
                 newNode->isEndOfWord = false;
-                newNode->value.clear();
+                newNode->id = -1;
                 return newNode;
             }
         
@@ -83,7 +78,7 @@ namespace DB{
             currentRoot = make_shared<TrieNode>();
         }
 
-        void insert(const string &word, std::string_view val) {
+        void insert(const string &word, const std::string& val) {
             std::unique_lock<std::shared_mutex> lock(sh_mtx);   // Unique lock for writers
             currentRoot = insert(currentRoot, word, 0, val);
         }
@@ -118,8 +113,8 @@ namespace DB{
                 }
                 node = node->children.at(ch);
             }
-            if (node && node->isEndOfWord) {
-                return node->value;
+            if (node && node->isEndOfWord && (node->id)!=-1) {
+                return m_storage[node->id];
             }
             return std::nullopt;
         }
