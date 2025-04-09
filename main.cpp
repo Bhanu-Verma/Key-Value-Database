@@ -8,7 +8,7 @@ int main(){
     {
         string command{};
         std::getline(std::cin >> std::ws, command);
-        std::string response { DB::execute(command, db) };
+        std::string response { DB::execute(command, &db) };
         if(response == DB::EXIT_RESPONSE){
             break;
         }
