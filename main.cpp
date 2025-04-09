@@ -5,7 +5,6 @@
 #include <sstream>
 #include <algorithm>
 #include "parser.hpp"
-#include "TrieNode.hpp"
 #include "Trie.hpp"
 
 namespace DB{
@@ -17,12 +16,14 @@ namespace DB{
         del,
         exists,
         set,
+        commit,
+        restore,
         help,
         maxCommands,
     };
     
     // Stores all the valid command
-    constexpr std::array validCommands{"exit"sv, "get"sv, "del"sv, "exists"sv, "set"sv, "help"sv};
+    constexpr std::array validCommands{"exit"sv, "get"sv, "del"sv, "exists"sv, "set"sv, "commit"sv, "restore"sv, "help"sv};
     static_assert(std::size(validCommands) == maxCommands);
 
     // Get the string from enumerator
@@ -37,7 +38,9 @@ namespace DB{
         std::cout << "3) del <key>\n";
         std::cout << "4) exists <key>\n";
         std::cout << "5) set <key> <value>\n";
-        std::cout << "6) help\n";
+        std::cout << "6) commit\n";
+        std::cout << "7) restore <version_id>\n";
+        std::cout << "8) help\n";
     }
 };
 
@@ -70,6 +73,9 @@ inline void argCountMismatch(int currSize, int expectedSize){
 }
 
 int main(){
+
+    DB::PersistentTrie trie{};
+
     while (true)
     {
         std::cout << "$ ";
@@ -86,10 +92,6 @@ int main(){
         }
 
         std::vector<std::string> tokens { DB::parse(command) };
-        for(const auto& s: tokens){
-            std::cout << s << '\n';
-        }
-        std::cout << '\n';
         if(tokens[0] == DB::getCommandName(DB::AllCommands::exit))
         {
             break;
@@ -97,7 +99,13 @@ int main(){
         else if(tokens[0] == DB::getCommandName(DB::AllCommands::get))  
         {
             if(tokens.size() == 2){
-                // TODO
+                auto res { trie.get(tokens[1]) };
+                if(res.has_value()){
+                    std::cout << res.value() << '\n';
+                }
+                else{
+                    std::cout << "key not found\n";
+                }
             }
             else{
                 argCountMismatch(static_cast<int>(tokens.size()), 2);
@@ -106,7 +114,13 @@ int main(){
         else if(tokens[0] == DB::getCommandName(DB::AllCommands::del))
         {
             if(tokens.size() == 2){
-                // TODO
+                if(trie.exists(tokens[1])){
+                    trie.remove(tokens[1]);
+                    std::cout << "Key: " << tokens[1] << " removed successfully\n";
+                }
+                else{
+                    std::cout << "key not found\n";
+                }
             }
             else{
                 argCountMismatch(static_cast<int>(tokens.size()), 2);
@@ -115,7 +129,8 @@ int main(){
         else if(tokens[0] == DB::getCommandName(DB::AllCommands::exists))
         {
             if(tokens.size() == 2){
-                // TODO
+                std::cout << std::boolalpha;
+                std::cout << trie.exists(tokens[1]) << '\n';
             }
             else{
                 argCountMismatch(static_cast<int>(tokens.size()), 2);
@@ -124,7 +139,8 @@ int main(){
         else if(tokens[0] == DB::getCommandName(DB::AllCommands::set))
         {
             if(tokens.size() == 3){
-                // TODO
+                trie.insert(tokens[1], tokens[2]);
+                std::cout << "One value inserted successfully\n";
             }
             else{
                 argCountMismatch(static_cast<int>(tokens.size()), 3);
@@ -133,8 +149,30 @@ int main(){
         else if(tokens[0] == DB::getCommandName(DB::AllCommands::help)){
             DB::showAllCommands();
         }
-        else{
-
+        else if(tokens[0] == DB::getCommandName(DB::AllCommands::commit)){
+            int versionId = trie.commit();
+            std::cout << "Version: " << versionId << " saved\n";
+        }
+        else if(tokens[0] == DB::getCommandName(DB::AllCommands::restore)){
+            if(tokens.size() == 2){
+                int versionId{};
+                try{
+                    versionId = stoi(tokens[1]);
+                }
+                catch(...){
+                    std::cout << "Not a valid version\n";
+                }   
+                bool response { trie.restore(versionId) };
+                if(response){
+                    std::cout << "Restored version " << versionId << '\n';
+                }
+                else{
+                    std::cout << "Unable to restore this version\n";
+                }
+            }
+            else{
+                argCountMismatch(static_cast<int>(tokens.size()), 2);
+            }
         }
     }
     
