@@ -13,10 +13,12 @@
 #define PORT 8080
 #define BUFFER_SIZE 1024
 
-void handleClient(int newSocket, DB::PersistentTrie* db) {
+void handleClient(int newSocket) {
     char buffer[BUFFER_SIZE];
 
     DB::Users* currentUser = nullptr;
+    DB::PersistentTrie *db = nullptr;
+
 
     while (currentUser == nullptr)
     {
@@ -96,7 +98,6 @@ int main() {
     // Main loop: Accept clients and spawn a thread for each one.
     while (true) {
 
-        DB::PersistentTrie *db = nullptr;
 
         newSocket = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen);
         if (newSocket < 0) {
@@ -108,7 +109,7 @@ int main() {
 
         
     
-        std::thread clientThread(handleClient, newSocket, db);
+        std::thread clientThread(handleClient, newSocket);
 
         clientThread.detach();
     }

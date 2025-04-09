@@ -20,10 +20,10 @@ namespace DB{
    {
    private:
    
-   std::string m_name{};
-   std::string m_password{};
-   // std::set<DB::PersistentTrie> m_databases{};
-   std::unordered_map<std::string, std::shared_ptr<DB::PersistentTrie>> m_databases;
+      std::string m_name{};
+      std::string m_password{};
+      // std::set<DB::PersistentTrie> m_databases{};
+      std::unordered_map<std::string, std::shared_ptr<DB::PersistentTrie>> m_databases;
 
 
    public:

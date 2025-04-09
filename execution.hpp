@@ -1,3 +1,6 @@
+#ifndef EXECUTION_H 
+#define EXECUTION_H
+
 #include <iostream>
 #include <array>
 #include <string>
@@ -246,3 +249,4 @@ namespace DB{
 
 
 
+#endif
