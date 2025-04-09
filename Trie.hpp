@@ -11,6 +11,8 @@
 #include <random>
 #include <cassert>
 #include <shared_mutex>
+#include <fstream>
+#include <stack>
 using namespace std;
 
 namespace DB{
@@ -124,6 +126,17 @@ namespace DB{
             }
             assert(st.size() == 1 && "Invalid serialized trie is passed");
             return st.top(); 
+        }
+
+        void saveCurrentState(){
+            std::ofstream fout("SerialTrie.bin");
+            for(auto& i : m_storage){
+                fout << i;
+                fout << '>';
+            }
+            fout << '\n';
+            fout << serialize();
+            fout.close();
         }
 
     private: 
