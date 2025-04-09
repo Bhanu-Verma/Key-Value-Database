@@ -13,15 +13,40 @@
 #define PORT 8080
 #define BUFFER_SIZE 1024
 
-void handleClient(int newSocket, DB::PersistentTrie& db) {
+void handleClient(int newSocket, DB::PersistentTrie* db) {
     char buffer[BUFFER_SIZE];
+
+    DB::Users* currentUser = nullptr;
+
+    while (currentUser == nullptr)
+    {
+        std::string response {"Give username and password\n"};
+        send(newSocket, response.c_str(), response.length(), 0);
+        memset(buffer, 0, BUFFER_SIZE);
+        int valread = read(newSocket, buffer, BUFFER_SIZE);
+        if (valread <= 0) break;
+        std::string input(buffer);
+
+        response = DB::execute(input, db, currentUser) ;
+        send(newSocket, response.c_str(), response.length(), 0);
+
+        if (response == DB::EXIT_RESPONSE) {
+            break;
+        }
+
+        // std::cout << "reached... here\n";
+
+    }
+    
+
+
     while (true) {
         memset(buffer, 0, BUFFER_SIZE);
         int valread = read(newSocket, buffer, BUFFER_SIZE);
         if (valread <= 0) break;
         std::string input(buffer);
        
-        std::string response{ DB::execute(input, db) };
+        std::string response{ DB::execute(input, db, currentUser) };
         send(newSocket, response.c_str(), response.length(), 0);
 
         if (response == DB::EXIT_RESPONSE) {
@@ -33,7 +58,6 @@ void handleClient(int newSocket, DB::PersistentTrie& db) {
 }
 
 int main() {
-    DB::PersistentTrie db;
 
     int server_fd, newSocket;
     struct sockaddr_in address;
@@ -71,6 +95,9 @@ int main() {
 
     // Main loop: Accept clients and spawn a thread for each one.
     while (true) {
+
+        DB::PersistentTrie *db = nullptr;
+
         newSocket = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen);
         if (newSocket < 0) {
             perror("accept");
@@ -78,8 +105,12 @@ int main() {
         }
 
         std::cout << "Client connected\n";
-        std::thread clientThread(handleClient, newSocket, std::ref(db));
-        clientThread.detach();  // Detach the thread to handle client independently.
+
+        
+    
+        std::thread clientThread(handleClient, newSocket, db);
+
+        clientThread.detach();
     }
 
     close(server_fd);
