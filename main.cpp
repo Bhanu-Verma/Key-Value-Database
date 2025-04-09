@@ -5,6 +5,8 @@
 #include <sstream>
 #include <algorithm>
 #include "parser.hpp"
+#include "TrieNode.hpp"
+#include "Trie.hpp"
 
 namespace DB{
     using namespace std::literals;
@@ -136,5 +138,7 @@ int main(){
         }
     }
     
+    
+
     return 0;
 }
