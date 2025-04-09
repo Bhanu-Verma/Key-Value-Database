@@ -98,12 +98,39 @@ namespace DB{
             s.push_back('>');
         }
 
+        shared_ptr<TrieNode> deserializeTrie(string& s){
+            stack<shared_ptr<TrieNode>> st;
+            st.push(make_shared<TrieNode>());
+            std::size_t length { static_cast<std::size_t>(s.size()) };
+            for(std::size_t i { 0 }; i < length; ++i){
+                assert(s[i] != ']' && "Invalid serialized trie is passed");
+                if(s[i] == '['){
+                    std::string valueId { };
+                    ++i;
+                    while(i < length && s[i] != ']'){
+                        valueId.push_back(s[i]);
+                        ++i;
+                    }
+                    assert(i < length && "Invalid serialized trie is passed");
+                    st.top()->id = std::stoi(valueId);
+                }else if(s[i] == '>'){
+                    assert(!(st.empty()) && "Invalid serialized trie is passed");
+                    st.pop();
+                }else{
+                    shared_ptr<TrieNode> currentNode { make_shared<TrieNode>() };
+                    st.top()->children[s[i]] = currentNode;
+                    st.push(currentNode);
+                }
+            }
+            assert(st.size() == 1 && "Invalid serialized trie is passed");
+            return st.top();
+        }
+
     private: 
         std::vector<std::string> m_storage;
         vector<shared_ptr<TrieNode>> versions;
         shared_ptr<TrieNode> currentRoot;
         mutable std::shared_mutex sh_mtx;
-
 
         shared_ptr<TrieNode> insert(shared_ptr<TrieNode> node, const string &word, int index, const std::string& val) {
             if (!node) node = make_shared<TrieNode>();
