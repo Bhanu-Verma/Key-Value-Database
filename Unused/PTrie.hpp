@@ -123,6 +123,8 @@ namespace DB
             assert(version < m_versions.size() && "no such version exists yet");
             m_versions.push_back(new TrieNode{*m_versions[version]});
         }
+
+        // write destructor
         
     private:
         std::vector<TrieNode*> m_versions{};

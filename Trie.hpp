@@ -11,6 +11,8 @@
 #include <random>
 #include <cassert>
 #include <shared_mutex>
+#include <fstream>
+#include <stack>
 using namespace std;
 
 namespace DB{
@@ -145,6 +147,66 @@ namespace DB{
             currentRoot = versions[version];
             return true;
         }
+
+        void serializeTrie(shared_ptr<TrieNode> node, string& s){
+            if(node->isEndOfWord){
+                s.push_back('[');
+                s += to_string(node->id);
+                s.push_back(']');
+            }
+            for(auto child : node->children){
+                s.push_back(child.first);
+                serializeTrie(child.second, s);
+            }
+            s.push_back('>');
+        }
+
+        shared_ptr<TrieNode> deserializeTrie(string& s){
+            stack<shared_ptr<TrieNode>> st;
+            st.push(make_shared<TrieNode>());
+            std::size_t length { static_cast<std::size_t>(s.size()) };
+            for(std::size_t i { 0 }; i < length; ++i){
+                assert(s[i] != ']' && "Invalid serialized trie is passed");
+                if(s[i] == '['){
+                    std::string valueId { };
+                    ++i;
+                    while(i < length && s[i] != ']'){
+                        valueId.push_back(s[i]);
+                        ++i;
+                    }
+                    assert(i < length && "Invalid serialized trie is passed");
+                    st.top()->id = std::stoi(valueId);
+                }else if(s[i] == '>'){
+                    assert(!(st.empty()) && "Invalid serialized trie is passed");
+                    st.pop();
+                }else{
+                    shared_ptr<TrieNode> currentNode { make_shared<TrieNode>() };
+                    st.top()->children[s[i]] = currentNode;
+                    st.push(currentNode);
+                }
+            }
+            assert(st.size() == 1 && "Invalid serialized trie is passed");
+            return st.top(); 
+        }
+
+        void saveCurrentState(){
+            std::ofstream fout("SerialTrie.bin");
+            for(auto& i : m_storage){
+                fout << i;
+                fout << '>';
+            }
+            fout << '\n';
+            fout << serialize();
+            fout.close();
+        }
+ 
+        string serialize(){
+            string s{};
+            serializeTrie(currentRoot,s);
+            s.pop_back();
+            return s;
+        }
+        
     };
 }
 
