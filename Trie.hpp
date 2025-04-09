@@ -17,7 +17,7 @@ using namespace std;
 
 namespace DB{
     struct TrieNode {
-        int id;
+        int id{-1};
         bool isEndOfWord{};
         std::unordered_map<char, shared_ptr<TrieNode>> children{};
 
