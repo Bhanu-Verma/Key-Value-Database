@@ -123,7 +123,7 @@ namespace DB{
                 }
             }
             assert(st.size() == 1 && "Invalid serialized trie is passed");
-            return st.top();
+            return st.top(); 
         }
 
     private: 
@@ -131,7 +131,7 @@ namespace DB{
         vector<shared_ptr<TrieNode>> versions;
         shared_ptr<TrieNode> currentRoot;
         mutable std::shared_mutex sh_mtx;
-
+ 
         shared_ptr<TrieNode> insert(shared_ptr<TrieNode> node, const string &word, int index, const std::string& val) {
             if (!node) node = make_shared<TrieNode>();
             shared_ptr<TrieNode> newNode = make_shared<TrieNode>(*node); 
