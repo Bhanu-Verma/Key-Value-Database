@@ -6,6 +6,7 @@
 #include <algorithm>
 #include "parser.hpp"
 #include "Trie.hpp"
+#include <fstream>
 
 namespace DB{
     using namespace std::literals;
@@ -40,20 +41,27 @@ namespace DB{
     /**
      * Checks if the first word of the command is valid
      */
-    bool isCommandValid(const std::string& command){
+    bool isCommandValid(const std::string command){
+
         size_t pos = command.find_first_of(" \n");
         std::string prefix = (pos == std::string::npos) ? command : command.substr(0, pos);
-        std::transform(prefix.begin(), prefix.end(), prefix.begin(),
-                    [](unsigned char c) { return std::tolower(c); });
+
+        // std::cout << "prefix " << prefix << '\n';
+
+        for(auto& ch : prefix){
+            ch = std::tolower(ch);
+        }
+
         return std::find(DB::validCommands.begin(), DB::validCommands.end(), prefix) != DB::validCommands.end();
+
     }
 
     std::string tooManyArgumentsMessage(){
-        std::string{ "Too many arguments provided. Try \"help\" to know syntax\n" };
+        return std::string{ "Too many arguments provided. Try \"help\" to know syntax\n" };
     }
     
     std::string tooFewArgumentsMessage(){
-        std::cout << "Too few arguments provided. Try \"help\" to know syntax\n";
+        return std::string{ "Too few arguments provided. Try \"help\" to know syntax\n" };
     }
     
     std::string argCountMismatch(int currSize, int expectedSize){
@@ -65,10 +73,19 @@ namespace DB{
         }
     }
 
-    std::string execute(const std::string& command, PersistentTrie& trie){
+    std::string execute(std::string& command, PersistentTrie& trie){
+
+        // just to remove trailing '\r' or '\n' characters
+        while (!command.empty() && (command.back() == '\n' || command.back() == '\r')) {
+            command.pop_back();
+        }
+
         if(!isCommandValid(command)){
             return std::string{"Not a valid command\n.Try \"help\" to list all available commands\n"};
         }
+
+        std::cout << "yes\n";
+
         std::vector<std::string> tokens { DB::parse(command) };
         if(tokens[0] == DB::getCommandName(DB::AllCommands::exit))
         {
@@ -78,7 +95,7 @@ namespace DB{
         {
             if(tokens.size() == 2){
                 auto res { trie.get(tokens[1]) };
-                return ((res.has_value())? res.value():"key not found"s);
+                return ((res.has_value())? res.value() + '\n' : "key not found\n"s);
             }
             else{
                 return argCountMismatch(static_cast<int>(tokens.size()), 2);
@@ -146,6 +163,8 @@ namespace DB{
                 return argCountMismatch(static_cast<int>(tokens.size()), 2);
             }
         }
+        return std::string{"Unhandled or incomplete command\n"};
+
     }
 };
 

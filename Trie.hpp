@@ -7,6 +7,7 @@
 #include <string>
 #include <unordered_map>
 #include <optional>
+#include <mutex>
 #include <random>
 #include <cassert>
 using namespace std;
@@ -26,8 +27,14 @@ namespace DB{
     private:
         vector<shared_ptr<TrieNode>> versions;
         shared_ptr<TrieNode> currentRoot;
+        std::mutex m_insert_mutex; // mutex object
+        std::mutex m_remove_mutex;
+
 
         shared_ptr<TrieNode> insert(shared_ptr<TrieNode> node, const string &word, int index, std::string_view val) {
+
+
+
             if (!node) node = make_shared<TrieNode>();
 
             shared_ptr<TrieNode> newNode = make_shared<TrieNode>(*node); // copy current node
@@ -51,6 +58,9 @@ namespace DB{
         }
 
         shared_ptr<TrieNode> remove(shared_ptr<TrieNode> node, const string &key, int index) {
+
+
+
             if (!node) return nullptr;
         
             shared_ptr<TrieNode> newNode = make_shared<TrieNode>(*node); // copy for persistence
@@ -74,6 +84,7 @@ namespace DB{
         }
 
         void insert(const string &word, std::string_view val) {
+            std::lock_guard<std::mutex> lock(m_insert_mutex); // Mutex locked here
             currentRoot = insert(currentRoot, word, 0, val);
         }
 
@@ -91,6 +102,7 @@ namespace DB{
         }
 
         void remove(const string &key) {
+            std::lock_guard<std::mutex> lock(m_remove_mutex); // Mutex locked here
             currentRoot = remove(currentRoot, key, 0);
         }
         
