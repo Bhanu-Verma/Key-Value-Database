@@ -10,6 +10,7 @@
 #include <mutex>
 #include <random>
 #include <cassert>
+#include <shared_mutex>
 using namespace std;
 
 namespace DB{
@@ -24,11 +25,10 @@ namespace DB{
     };
 
     class PersistentTrie {
-    private:
+    private: 
         vector<shared_ptr<TrieNode>> versions;
         shared_ptr<TrieNode> currentRoot;
-        std::mutex m_insert_mutex; // mutex object
-        std::mutex m_remove_mutex;
+        mutable std::shared_mutex sh_mtx;
 
 
         shared_ptr<TrieNode> insert(shared_ptr<TrieNode> node, const string &word, int index, std::string_view val) {
@@ -84,29 +84,33 @@ namespace DB{
         }
 
         void insert(const string &word, std::string_view val) {
-            std::lock_guard<std::mutex> lock(m_insert_mutex); // Mutex locked here
+            std::unique_lock<std::shared_mutex> lock(sh_mtx);   // Unique lock for writers
             currentRoot = insert(currentRoot, word, 0, val);
         }
 
         int commit() {
+            std::unique_lock<std::shared_mutex> lock(sh_mtx);
             versions.push_back(currentRoot);
             return versions.size() - 1; // return version index
         }
 
         bool exists(const string &key) const {
+            std::shared_lock<std::shared_mutex> lock(sh_mtx);
             return exists(currentRoot, key, 0);
         }
 
         int versionCount() const {
+            std::shared_lock<std::shared_mutex> lock(sh_mtx);
             return versions.size();
         }
 
         void remove(const string &key) {
-            std::lock_guard<std::mutex> lock(m_remove_mutex); // Mutex locked here
+            std::unique_lock<std::shared_mutex> lock(sh_mtx);
             currentRoot = remove(currentRoot, key, 0);
         }
         
         std::optional<std::string> get(std::string_view key) const {
+            std::shared_lock<std::shared_mutex> lock(sh_mtx);
             shared_ptr<TrieNode> node = currentRoot;
             for (char ch : key) {
                 if (!node || node->children.find(ch) == node->children.end()) {
@@ -121,6 +125,7 @@ namespace DB{
         }
 
         bool restore(int version) {
+            std::unique_lock<std::shared_mutex> lock(sh_mtx);   
             if (version < 0 || version >= versions.size()) {
                 return false;
             }
