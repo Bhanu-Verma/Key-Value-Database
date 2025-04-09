@@ -21,8 +21,9 @@ namespace DB{
         bool isEndOfWord{};
         std::unordered_map<char, shared_ptr<TrieNode>> children{};
 
-        TrieNode(bool isEnd = false)
+        TrieNode(bool isEnd = false, int _id=-1)
         : isEndOfWord{ isEnd }
+        , id{ _id }
         {}
     };
 
