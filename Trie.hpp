@@ -7,13 +7,15 @@
 #include <string>
 #include <unordered_map>
 #include <optional>
+#include <mutex>
 #include <random>
 #include <cassert>
+#include <shared_mutex>
 using namespace std;
 
 namespace DB{
     struct TrieNode {
-        std::string value{};
+        int id;
         bool isEndOfWord{};
         std::unordered_map<char, shared_ptr<TrieNode>> children{};
 
@@ -23,18 +25,22 @@ namespace DB{
     };
 
     class PersistentTrie {
-    private:
+    private: 
+        std::vector<std::string> m_storage;
         vector<shared_ptr<TrieNode>> versions;
         shared_ptr<TrieNode> currentRoot;
+        mutable std::shared_mutex sh_mtx;
 
-        shared_ptr<TrieNode> insert(shared_ptr<TrieNode> node, const string &word, int index, std::string_view val) {
+
+        shared_ptr<TrieNode> insert(shared_ptr<TrieNode> node, const string &word, int index, const std::string& val) {
             if (!node) node = make_shared<TrieNode>();
-
-            shared_ptr<TrieNode> newNode = make_shared<TrieNode>(*node); // copy current node
+            shared_ptr<TrieNode> newNode = make_shared<TrieNode>(*node); 
 
             if (index == word.size()) {
+                // put the word in storage 
+                m_storage.push_back(val);
                 newNode->isEndOfWord = true;
-                newNode->value = val;
+                newNode->id = m_storage.size() - 1;
                 return newNode;
             }
 
@@ -51,14 +57,13 @@ namespace DB{
         }
 
         shared_ptr<TrieNode> remove(shared_ptr<TrieNode> node, const string &key, int index) {
-            if (!node) return nullptr;
-        
-            shared_ptr<TrieNode> newNode = make_shared<TrieNode>(*node); // copy for persistence
-        
+            if (!node) return nullptr;       
+            shared_ptr<TrieNode> newNode = make_shared<TrieNode>(*node);
+
             if (index == key.size()) {
                 if (!newNode->isEndOfWord) return newNode; // key doesn't exist
                 newNode->isEndOfWord = false;
-                newNode->value.clear();
+                newNode->id = -1;
                 return newNode;
             }
         
@@ -73,28 +78,34 @@ namespace DB{
             currentRoot = make_shared<TrieNode>();
         }
 
-        void insert(const string &word, std::string_view val) {
+        void insert(const string &word, const std::string& val) {
+            std::unique_lock<std::shared_mutex> lock(sh_mtx);   // Unique lock for writers
             currentRoot = insert(currentRoot, word, 0, val);
         }
 
         int commit() {
+            std::unique_lock<std::shared_mutex> lock(sh_mtx);
             versions.push_back(currentRoot);
             return versions.size() - 1; // return version index
         }
 
         bool exists(const string &key) const {
+            std::shared_lock<std::shared_mutex> lock(sh_mtx);
             return exists(currentRoot, key, 0);
         }
 
         int versionCount() const {
+            std::shared_lock<std::shared_mutex> lock(sh_mtx);
             return versions.size();
         }
 
         void remove(const string &key) {
+            std::unique_lock<std::shared_mutex> lock(sh_mtx);
             currentRoot = remove(currentRoot, key, 0);
         }
         
         std::optional<std::string> get(std::string_view key) const {
+            std::shared_lock<std::shared_mutex> lock(sh_mtx);
             shared_ptr<TrieNode> node = currentRoot;
             for (char ch : key) {
                 if (!node || node->children.find(ch) == node->children.end()) {
@@ -102,13 +113,14 @@ namespace DB{
                 }
                 node = node->children.at(ch);
             }
-            if (node && node->isEndOfWord) {
-                return node->value;
+            if (node && node->isEndOfWord && (node->id)!=-1) {
+                return m_storage[node->id];
             }
             return std::nullopt;
         }
 
         bool restore(int version) {
+            std::unique_lock<std::shared_mutex> lock(sh_mtx);   
             if (version < 0 || version >= versions.size()) {
                 return false;
             }
