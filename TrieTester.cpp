@@ -31,7 +31,7 @@ void testTrieWithVersioning(size_t operations = 10000) {
     for (size_t i = 0; i < operations; ++i) {
         std::cout << i+1 << ") ";
         int op = opDist(rng);
-        std::string key = randomString(1 + rng() % 1); // key: 5–9 chars
+        std::string key = randomString(1 + rng() % 2); // key: 5–9 chars
 
         if (op <= 4) {
             // INSERT (50% chance)

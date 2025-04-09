@@ -64,11 +64,24 @@ namespace DB{
                 if (!newNode->isEndOfWord) return newNode; // key doesn't exist
                 newNode->isEndOfWord = false;
                 newNode->id = -1;
+                if(newNode->children.empty()){
+                    return nullptr;
+                }
                 return newNode;
             }
         
             char ch = key[index];
-            newNode->children[ch] = remove(newNode->children[ch], key, index + 1);
+            auto removed = remove(newNode->children[ch], key, index + 1);
+            if(removed){
+                newNode->children[ch] = removed;
+            }
+            else{
+                if(newNode->children.find(ch) != newNode->children.end())
+                    newNode->children.erase(ch);
+                if(newNode->children.empty() && (newNode->id)==-1){
+                    return nullptr;
+                }
+            }
             return newNode;
         }
         
