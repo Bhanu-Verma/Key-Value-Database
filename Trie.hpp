@@ -15,7 +15,7 @@ using namespace std;
 
 namespace DB{
     struct TrieNode {
-        std::string value{};
+        int id;
         bool isEndOfWord{};
         std::unordered_map<char, shared_ptr<TrieNode>> children{};
 
@@ -25,65 +25,12 @@ namespace DB{
     };
 
     class PersistentTrie {
-    private: 
-        vector<shared_ptr<TrieNode>> versions;
-        shared_ptr<TrieNode> currentRoot;
-        mutable std::shared_mutex sh_mtx;
-
-
-        shared_ptr<TrieNode> insert(shared_ptr<TrieNode> node, const string &word, int index, std::string_view val) {
-
-
-
-            if (!node) node = make_shared<TrieNode>();
-
-            shared_ptr<TrieNode> newNode = make_shared<TrieNode>(*node); // copy current node
-
-            if (index == word.size()) {
-                newNode->isEndOfWord = true;
-                newNode->value = val;
-                return newNode;
-            }
-
-            char ch = word[index];
-            newNode->children[ch] = insert(node->children[ch], word, index + 1, val);
-            return newNode;
-        }
-
-        bool exists(shared_ptr<TrieNode> node, const string &word, int index) const {
-            if (!node) return false;
-            if (index == word.size()) return node->isEndOfWord;
-            char ch = word[index];
-            return exists(node->children[ch], word, index + 1);
-        }
-
-        shared_ptr<TrieNode> remove(shared_ptr<TrieNode> node, const string &key, int index) {
-
-
-
-            if (!node) return nullptr;
-        
-            shared_ptr<TrieNode> newNode = make_shared<TrieNode>(*node); // copy for persistence
-        
-            if (index == key.size()) {
-                if (!newNode->isEndOfWord) return newNode; // key doesn't exist
-                newNode->isEndOfWord = false;
-                newNode->value.clear();
-                return newNode;
-            }
-        
-            char ch = key[index];
-            newNode->children[ch] = remove(newNode->children[ch], key, index + 1);
-            return newNode;
-        }
-        
-
     public:
         PersistentTrie() {
             currentRoot = make_shared<TrieNode>();
         }
 
-        void insert(const string &word, std::string_view val) {
+        void insert(const string &word, const std::string& val) {
             std::unique_lock<std::shared_mutex> lock(sh_mtx);   // Unique lock for writers
             currentRoot = insert(currentRoot, word, 0, val);
         }
@@ -118,8 +65,8 @@ namespace DB{
                 }
                 node = node->children.at(ch);
             }
-            if (node && node->isEndOfWord) {
-                return node->value;
+            if (node && node->isEndOfWord && (node->id)!=-1) {
+                return m_storage[node->id];
             }
             return std::nullopt;
         }
@@ -137,6 +84,74 @@ namespace DB{
             currentRoot = versions[version];
             return true;
         }
+
+        void serializeTrie(shared_ptr<TrieNode> node, string& s){
+            if(node->isEndOfWord){
+                s.push_back('[');
+                s += to_string(node->id);
+                s.push_back(']');
+            }
+            for(auto child : node->children){
+                s.push_back(child.first);
+                serializeTrie(child.second, s);
+            }
+            s.push_back('>');
+        }
+
+    private: 
+        std::vector<std::string> m_storage;
+        vector<shared_ptr<TrieNode>> versions;
+        shared_ptr<TrieNode> currentRoot;
+        mutable std::shared_mutex sh_mtx;
+
+
+        shared_ptr<TrieNode> insert(shared_ptr<TrieNode> node, const string &word, int index, const std::string& val) {
+            if (!node) node = make_shared<TrieNode>();
+            shared_ptr<TrieNode> newNode = make_shared<TrieNode>(*node); 
+
+            if (index == word.size()) {
+                // put the word in storage 
+                m_storage.push_back(val);
+                newNode->isEndOfWord = true;
+                newNode->id = m_storage.size() - 1;
+                return newNode;
+            }
+
+            char ch = word[index];
+            newNode->children[ch] = insert(node->children[ch], word, index + 1, val);
+            return newNode;
+        }
+
+        bool exists(shared_ptr<TrieNode> node, const string &word, int index) const {
+            if (!node) return false;
+            if (index == word.size()) return node->isEndOfWord;
+            char ch = word[index];
+            return exists(node->children[ch], word, index + 1);
+        }
+
+        shared_ptr<TrieNode> remove(shared_ptr<TrieNode> node, const string &key, int index) {
+            if (!node) return nullptr;       
+            shared_ptr<TrieNode> newNode = make_shared<TrieNode>(*node);
+
+            if (index == key.size()) {
+                if (!newNode->isEndOfWord) return newNode; // key doesn't exist
+                newNode->isEndOfWord = false;
+                newNode->id = -1;
+                return newNode;
+            }
+        
+            char ch = key[index];
+            newNode->children[ch] = remove(newNode->children[ch], key, index + 1);
+            return newNode;
+        }
+
+        string serialize(){
+            string s{};
+            serializeTrie(currentRoot,s);
+            s.pop_back();
+            return s;
+        }
+        
     };
 }
 
