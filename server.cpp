@@ -20,17 +20,20 @@ void handleClient(int newSocket) {
     std::shared_ptr<DB::Users> currentUser{nullptr};
     std::shared_ptr<DB::PersistentTrie> db{nullptr};
 
+    std::string response {"Authenticate First\r\n" };
+    send(newSocket, response.c_str(), response.length(), 0);
 
     while (currentUser == nullptr)
     {
-        std::string response {"Give username and password\n"};
-        send(newSocket, response.c_str(), response.length(), 0);
+        std::string prompt{ "$ " };
+        send(newSocket, prompt.c_str(), prompt.length(), 0);
+
         memset(buffer, 0, BUFFER_SIZE);
         int valread = read(newSocket, buffer, BUFFER_SIZE);
         if (valread <= 0) break;
         std::string input(buffer);
 
-        response = DB::execute(input, db, currentUser) ;
+        std::string response = DB::execute(input, db, currentUser) ;
         send(newSocket, response.c_str(), response.length(), 0);
 
         if (response == DB::EXIT_RESPONSE) {
@@ -44,6 +47,9 @@ void handleClient(int newSocket) {
 
 
     while (true) {
+        std::string prompt{ "$ " };
+        send(newSocket, prompt.c_str(), prompt.length(), 0);
+
         memset(buffer, 0, BUFFER_SIZE);
         int valread = read(newSocket, buffer, BUFFER_SIZE);
         if (valread <= 0) break;
@@ -65,7 +71,7 @@ void handleClient(int newSocket) {
     
     close(newSocket);
 
-    std::cout << "Client disconnected\n";
+    // std::cout << "Client disconnected" << std::endl;
     // delete db;
     // db = nullptr;
 }

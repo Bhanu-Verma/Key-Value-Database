@@ -174,7 +174,7 @@ namespace DB{
 
       auto it = activeUsers.find(username);
       if (it != activeUsers.end() && it->second->authenticatePassword(password)) {
-         std::cout << "authentication success in Users\n";
+         std::cout << "Authentication Success: " << username << std::endl;
 
          std::lock_guard<std::mutex> lock(concurrentMutex);
          concurrentCount[username]++;
@@ -186,27 +186,27 @@ namespace DB{
    }
 
    bool initServer(){
-      std::cout << "Filename: " << allUsersFileName << '\n';
+      // std::cout << "Filename: " << allUsersFileName << '\n';
       const fs::path allUsersFilePath { allUsersFileName};
-      std::cout << "Filepath: " << allUsersFilePath << '\n';
+      // std::cout << "Filepath: " << allUsersFilePath << '\n';
     
 
       std::ifstream myFileStream { allUsersFilePath.c_str() };
       json j = json::parse(myFileStream);
 
-      std::cout << "Extracting allUsers details from the file..\n";
+      // std::cout << "Extracting allUsers details from the file..\n";
       totalUsers = j["totalUsers"];
-      std::cout << "totalUsers: " << totalUsers << '\n';
+      // std::cout << "totalUsers: " << totalUsers << '\n';
       allUsers.clear();
       for(int i{0}; i < totalUsers; ++i){
          allUsers[j["Users"][i]["userName"]] = j["Users"][i]["password"];
          // std::cout << j["Users"][i]["userName"] << " -> " <<  j["Users"][i]["password"] << '\n';
       }
 
-      std::cout << "User Details -> \n";
-      for(auto [u, p]: allUsers){
-         std::cout << "userName: " << u << ' ' << ", password: " << p << '\n'; 
-      }
+      // std::cout << "User Details -> \n";
+      // for(auto [u, p]: allUsers){
+      //    std::cout << "userName: " << u << ' ' << ", password: " << p << '\n'; 
+      // }
       return true;
    }
 

@@ -385,7 +385,7 @@ namespace DB
 
         ~PersistentTrie(){
             saveTrie("./Server-Data/Data/" + m_ownerName + '_' + m_name + ".db");
-            std::cout << "saved Trie: " << m_name << " for user: " << m_ownerName << std::endl;
+            std::cout << "Saved Trie: " << m_name << " for User: " << m_ownerName << std::endl;
 
         }
 

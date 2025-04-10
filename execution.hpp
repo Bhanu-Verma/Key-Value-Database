@@ -14,7 +14,7 @@
 
 namespace DB{
     using namespace std::literals;
-    const std::string EXIT_RESPONSE ( "Exited Successfully\n"s );
+    const std::string EXIT_RESPONSE ( "Exited Successfully\r\n"s );
 
     enum AllCommands{
         exit,
