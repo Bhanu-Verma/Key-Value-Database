@@ -1,0 +1,14 @@
+{
+    "totalUsers": 2,
+    "Users": [
+        {
+            "userName": "vishnu",
+            "password": "vi"
+        },
+        {
+            "userName": "ramu",
+            "password": "ra"
+        }
+    ]
+
+}
