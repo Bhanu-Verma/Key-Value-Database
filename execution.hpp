@@ -66,11 +66,11 @@ namespace DB{
 
     }
 
-    std::string tooManyArgumentsMessage(){
+    inline std::string tooManyArgumentsMessage(){
         return std::string{ "Too many arguments provided. Try \"help\" to know syntax\r\n" };
     }
     
-    std::string tooFewArgumentsMessage(){
+    inline std::string tooFewArgumentsMessage(){
         return std::string{ "Too few arguments provided. Try \"help\" to know syntax\r\n" };
     }
     
