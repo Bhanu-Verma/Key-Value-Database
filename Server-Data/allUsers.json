@@ -1,0 +1,25 @@
+{
+    "Users": [
+        {
+            "password": "vi",
+            "userName": "vishnu"
+        },
+        {
+            "password": "ra",
+            "userName": "ramu"
+        },
+        {
+            "password": "ra",
+            "userName": "bhanu"
+        },
+        {
+            "password": "abcd",
+            "userName": "piyush"
+        },
+        {
+            "password": "ra",
+            "userName": "vish"
+        }
+    ],
+    "totalUsers": 5
+}
