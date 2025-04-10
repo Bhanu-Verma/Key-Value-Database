@@ -68,6 +68,14 @@ namespace DB{
          return m_password == password;
          //  apply a decryptor here
       }
+
+      std::string listDatabases(){
+         std::string response{};
+         for(auto db : allDatabases){
+            response += db + "\r\n";
+         }
+         return response;
+      }
       
       ~Users() = default;
 

@@ -30,11 +30,12 @@ namespace DB{
         authenticate,
         create_user,
         save_database,
+        list_databases,
         maxCommands,
     };
     
     // Stores all the valid command
-    constexpr std::array validCommands{"exit"sv, "get"sv, "del"sv, "exists"sv, "set"sv, "commit"sv, "restore"sv, "help"sv, "create_database"sv, "use_database"sv, "authenticate"sv, "create_user"sv, "save_database"sv};
+    constexpr std::array validCommands{"exit"sv, "get"sv, "del"sv, "exists"sv, "set"sv, "commit"sv, "restore"sv, "help"sv, "create_database"sv, "use_database"sv, "authenticate"sv, "create_user"sv, "save_database"sv, "list_databases"sv};
 
     static_assert(std::size(validCommands) == maxCommands);
     
@@ -45,7 +46,7 @@ namespace DB{
     
     // Prints all available commands
     std::string showAllCommands(){
-        return std::string {"1) exit\r\n2) get <key>\r\n3) del <key>\r\n4) exists <key>\r\n5) set <key> <value>\r\n6) commit\r\n7) restore <version_id>\r\n8) help\r\n9) create_database <db_name>\r\n10) use_database <db_name>\r\n11) authenticate <user_name> <password>\r\n12) create <user_name> <password>\r\n13) save_database <db_name>\r\n" };
+        return std::string {"1) exit\r\n2) get <key>\r\n3) del <key>\r\n4) exists <key>\r\n5) set <key> <value>\r\n6) commit\r\n7) restore <version_id>\r\n8) help\r\n9) create_database <db_name>\r\n10) use_database <db_name>\r\n11) authenticate <user_name> <password>\r\n12) create_user <user_name> <password>\r\n13) save_database <db_name>\r\n14) list_databases\r\n" };
     }
 
     /**
@@ -167,6 +168,16 @@ namespace DB{
             }
             else{
                 return argCountMismatch(static_cast<int>(tokens.size()), 2);
+            }
+
+        }
+        else if(tokens[0] == DB::getCommandName(DB::AllCommands::list_databases)){
+
+            if(tokens.size() == 1){
+                return currentUser->listDatabases();
+            }
+            else{
+                return argCountMismatch(static_cast<int>(tokens.size()), 1);
             }
 
         }
