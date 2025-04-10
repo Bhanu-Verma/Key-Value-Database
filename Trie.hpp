@@ -18,13 +18,13 @@ using namespace std;
 
 namespace DB{
     struct TrieNode {
-        int id{-1};
+        int index{-1}; 
         bool isEndOfWord{};
         std::unordered_map<char, shared_ptr<TrieNode>> children{};
 
         TrieNode(bool isEnd = false, int _id=-1)
         : isEndOfWord{ isEnd }
-        , id{ _id }
+        , index{ _id }
         {}
     };
 
@@ -45,7 +45,7 @@ namespace DB{
                 // put the word in storage 
                 m_storage.push_back(val);
                 newNode->isEndOfWord = true;
-                newNode->id = m_storage.size() - 1;
+                newNode->index = m_storage.size() - 1;
                 return newNode;
             }
 
@@ -68,7 +68,7 @@ namespace DB{
             if (index == key.size()) {
                 if (!newNode->isEndOfWord) return newNode; // key doesn't exist
                 newNode->isEndOfWord = false;
-                newNode->id = -1;
+                newNode->index = -1;
                 if(newNode->children.empty()){
                     return nullptr;
                 }
@@ -83,7 +83,7 @@ namespace DB{
             else{
                 if(newNode->children.find(ch) != newNode->children.end())
                     newNode->children.erase(ch);
-                if(newNode->children.empty() && (newNode->id)==-1){
+                if(newNode->children.empty() && (newNode->index)==-1){
                     return nullptr;
                 }
             }
@@ -156,8 +156,8 @@ namespace DB{
                 }
                 node = node->children.at(ch);
             }
-            if (node && node->isEndOfWord && (node->id)!=-1) {
-                return m_storage[node->id];
+            if (node && node->isEndOfWord && (node->index)!=-1) {
+                return m_storage[node->index];
             }
             return std::nullopt;
         }
@@ -179,7 +179,7 @@ namespace DB{
         void serializeTrie(shared_ptr<TrieNode> node, string& s){
             if(node->isEndOfWord){
                 s.push_back('[');
-                s += to_string(node->id);
+                s += to_string(node->index);
                 s.push_back(']');
             }
             for(auto child : node->children){
@@ -203,7 +203,7 @@ namespace DB{
                         ++i;
                     }
                     assert(i < length && "Invalid serialized trie is passed");
-                    st.top()->id = std::stoi(valueId);
+                    st.top()->index = std::stoi(valueId);
                     st.top()->isEndOfWord = true;
                 }else if(s[i] == '>'){
                     assert(!(st.empty()) && "Invalid serialized trie is passed");
