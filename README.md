@@ -4,7 +4,7 @@ A lightweight, high-performance, in-memory key-value store designed from scratch
 
 ---
 
-## 🚀 Features
+## Key Features
 
 - **Efficient Key Management** using a custom Trie data structure.
 - **Persistence Support** through trie serialization to disk.
