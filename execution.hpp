@@ -44,8 +44,8 @@ namespace DB{
     }
     
     // Prints all available commands
-    inline std::string showAllCommands(){
-        return std::string {"1) exit\n2) get <key>\n3) del <key>\n4) exists <key>\n5) set <key> <value>\n6) commit\n7) restore <version_id>\n8) help\n9) create_database <db_name>\n10) use_database <db_name>\n11) authenticate <user_name> <password>\n12) create <user_name> <password>\n13) save_database <db_name>\n" };
+    std::string showAllCommands(){
+        return std::string {"1) exit\r\n2) get <key>\r\n3) del <key>\r\n4) exists <key>\r\n5) set <key> <value>\r\n6) commit\r\n7) restore <version_id>\r\n8) help\r\n9) create_database <db_name>\r\n10) use_database <db_name>\r\n11) authenticate <user_name> <password>\r\n12) create <user_name> <password>\r\n13) save_database <db_name>\r\n" };
     }
 
     /**
@@ -66,12 +66,12 @@ namespace DB{
 
     }
 
-    inline std::string tooManyArgumentsMessage(){
-        return std::string{ "Too many arguments provided. Try \"help\" to know syntax\n" };
+    std::string tooManyArgumentsMessage(){
+        return std::string{ "Too many arguments provided. Try \"help\" to know syntax\r\n" };
     }
     
-    inline std::string tooFewArgumentsMessage(){
-        return std::string{ "Too few arguments provided. Try \"help\" to know syntax\n" };
+    std::string tooFewArgumentsMessage(){
+        return std::string{ "Too few arguments provided. Try \"help\" to know syntax\r\n" };
     }
     
     inline std::string argCountMismatch(int currSize, int expectedSize){
@@ -95,7 +95,7 @@ namespace DB{
         }
 
         if(!isCommandValid(command)){
-            return std::string{"Not a valid command\n.Try \"help\" to list all available commands\n"};
+            return std::string{"Not a valid command\r\n.Try \"help\" to list all available commands\r\n"};
         }
 
         // std::cout << "yes\n";
@@ -108,8 +108,8 @@ namespace DB{
                 std::string userName = tokens[1];
                 std::string passward = tokens[2];
 
-                if(DB::registerUser(userName, passward))return std::string {"Registered Successfully\n"};
-                else return std::string {"Registration Failed\n"};
+                if(DB::registerUser(userName, passward))return std::string {"Registered Successfully\r\n"};
+                else return std::string {"Registration Failed\r\n"};
             }
             else return argCountMismatch(static_cast<int>(tokens.size()), 3);
 
@@ -121,21 +121,21 @@ namespace DB{
                 std::string passward = tokens[2];
 
                 currentUser = DB::authentication(userName, passward);
-                if(currentUser == nullptr) return std::string {"Authentication Failed\n"};
-                else return std::string {"Authentication Successful\n"};
+                if(currentUser == nullptr) return std::string {"Authentication Failed\r\n"};
+                else return std::string {"Authentication Successful\r\n"};
             }
             else return argCountMismatch(static_cast<int>(tokens.size()), 3);
 
         }
         else if(tokens[0] == DB::getCommandName(DB::AllCommands::save_database)){
 
-            if(currentUser == nullptr) return std::string {"User not authenticated\n"};
-            if(triePtr == nullptr) return std::string {"Database not selected\n"};
+            if(currentUser == nullptr) return std::string {"User not authenticated\r\n"};
+            if(triePtr == nullptr) return std::string {"Database not selected\r\n"};
 
             if(tokens.size() == 2){
                 std::string fileName { "./Server-Data/Data/" + currentUser->m_name + '_' + triePtr->m_name + ".db" };
                 triePtr->saveTrie(fileName);
-                return std::string {"Database saved successfully\n"};
+                return std::string {"Database saved successfully\r\n"};
             }
             else{
                 return argCountMismatch(static_cast<int>(tokens.size()), 2);
@@ -150,9 +150,9 @@ namespace DB{
                 auto dbOpt = currentUser->getDatabase(tokens[1]);
                 if (dbOpt) {
                     triePtr = dbOpt;
-                    return std::string {tokens[1] + " is active\n"};
+                    return std::string {tokens[1] + " is active\r\n"};
                 } else {
-                    return std::string {"Database not found.\n"};
+                    return std::string {"Database not found.\r\n"};
                 }
             }
             else{
@@ -176,11 +176,11 @@ namespace DB{
         }
         else if(tokens[0] == DB::getCommandName(DB::AllCommands::get))  
         {
-            if(triePtr == nullptr) return std::string {"Database not selected\n"};
+            if(triePtr == nullptr) return std::string {"Database not selected\r\n"};
             
             if(tokens.size() == 2){
                 auto res { triePtr->get(tokens[1]) };
-                return ((res.has_value())? res.value() + '\n' : "key not found\n"s);
+                return ((res.has_value())? res.value() + "\r\n" : "key not found\r\n"s);
             }
             else{
                 return argCountMismatch(static_cast<int>(tokens.size()), 2);
@@ -188,12 +188,12 @@ namespace DB{
         }
         else if(tokens[0] == DB::getCommandName(DB::AllCommands::del))
         {
-            if(triePtr == nullptr) return std::string {"Database not selected\n"};
+            if(triePtr == nullptr) return std::string {"Database not selected\r\n"};
 
             if(tokens.size() == 2){
                 if(triePtr->exists(tokens[1])){
                     triePtr->remove(tokens[1]);
-                    return std::string{"Key: " + tokens[1] + " removed successfully\n"};
+                    return std::string{"Key: " + tokens[1] + " removed successfully\r\n"};
                 }
                 else{
                     return std::string { "key not found\n" };
