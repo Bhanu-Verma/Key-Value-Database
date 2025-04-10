@@ -181,6 +181,7 @@ namespace DB{
          activeUsers.emplace(username, make_shared<Users>(username, password));
       }
 
+
       auto it = activeUsers.find(username);
       if (it != activeUsers.end() && it->second->authenticatePassword(password)) {
          std::cout << "Authentication Success: " << username << std::endl;

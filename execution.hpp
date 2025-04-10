@@ -118,6 +118,8 @@ namespace DB{
 
         }
         else if(tokens[0] == DB::getCommandName(DB::AllCommands::authenticate)){
+            
+
             if(tokens.size() == 3){
                 std::string userName = tokens[1];
                 std::string passward = tokens[2];

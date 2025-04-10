@@ -32,7 +32,6 @@ void handleClient(int newSocket) {
         int valread = read(newSocket, buffer, BUFFER_SIZE);
         if (valread <= 0) break;
         std::string input(buffer);
-
         std::string response = DB::execute(input, db, currentUser) ;
         send(newSocket, response.c_str(), response.length(), 0);
 

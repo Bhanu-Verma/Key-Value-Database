@@ -1,57 +1,6 @@
 {
     "Users": [
-        {
-            "password": "vi",
-            "userName": "vishnu"
-        },
-        {
-            "password": "ra",
-            "userName": "ramu"
-        },
-        {
-            "password": "ra",
-            "userName": "bhanu"
-        },
-        {
-            "password": "abcd",
-            "userName": "piyush"
-        },
-        {
-            "password": "ra",
-            "userName": "vish"
-        },
-        {
-            "password": "dabloo",
-            "userName": "babloo"
-        },
-        {
-            "password": "pika",
-            "userName": "pikachu"
-        },
-        {
-            "password": "123",
-            "userName": "bob"
-        },
-        {
-            "password": "123",
-            "userName": "bob1"
-        },
-        {
-            "password": "123",
-            "userName": "bob2"
-        },
-        {
-            "password": "1234",
-            "userName": "bhanu1"
-        },
-        {
-            "password": "123",
-            "userName": "alice"
-        },
-        {
-            "password": "123",
-            "userName": "john"
-        }
+        
     ],
-    "totalUsers": 13
+    "totalUsers": 0
 }

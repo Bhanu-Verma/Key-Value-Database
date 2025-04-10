@@ -11,3 +11,4 @@ test
 main.cpp
 TrieTester
 *.out
+kvstore
