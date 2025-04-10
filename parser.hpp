@@ -8,7 +8,7 @@
 #include <algorithm>
 
 namespace DB{
-    inline std::vector<std::string> DB::parse(const std::string& command){
+    inline std::vector<std::string> parse(const std::string& command){
         std::stringstream commandStream{ command };
         std::vector<std::string> result{};
         std::string curr{};

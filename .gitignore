@@ -10,3 +10,4 @@ SerialTrie.bin
 test
 main.cpp
 TrieTester
+*.out
