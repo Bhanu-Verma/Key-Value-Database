@@ -1,6 +1,10 @@
 {
     "babloo": [
-        "db"
+        "db",
+        "db\u001b[B"
+    ],
+    "pikachu": [
+        "thunderDB"
     ],
     "ramu": [
         "data1",

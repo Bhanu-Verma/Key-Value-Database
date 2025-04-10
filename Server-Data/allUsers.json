@@ -23,7 +23,11 @@
         {
             "password": "dabloo",
             "userName": "babloo"
+        },
+        {
+            "password": "pika",
+            "userName": "pikachu"
         }
     ],
-    "totalUsers": 6
+    "totalUsers": 7
 }
