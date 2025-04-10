@@ -39,19 +39,19 @@ namespace DB{
     static_assert(std::size(validCommands) == maxCommands);
     
     // Get the string from enumerator
-    constexpr std::string_view getCommandName(AllCommands command) {
+    inline constexpr std::string_view getCommandName(AllCommands command) {
         return validCommands[static_cast<std::size_t>(command)];
     }
     
     // Prints all available commands
-    std::string showAllCommands(){
+    inline std::string showAllCommands(){
         return std::string {"1) exit\n2) get <key>\n3) del <key>\n4) exists <key>\n5) set <key> <value>\n6) commit\n7) restore <version_id>\n8) help\n9) create_database <db_name>\n10) use_database <db_name>\n11) authenticate <user_name> <password>\n12) create <user_name> <password>\n13) save_database <db_name>\n" };
     }
 
     /**
      * Checks if the first word of the command is valid
      */
-    bool isCommandValid(const std::string command){
+    inline bool isCommandValid(const std::string command){
 
         size_t pos = command.find_first_of(" \n");
         std::string prefix = (pos == std::string::npos) ? command : command.substr(0, pos);
@@ -66,15 +66,15 @@ namespace DB{
 
     }
 
-    std::string tooManyArgumentsMessage(){
+    inline std::string tooManyArgumentsMessage(){
         return std::string{ "Too many arguments provided. Try \"help\" to know syntax\n" };
     }
     
-    std::string tooFewArgumentsMessage(){
+    inline std::string tooFewArgumentsMessage(){
         return std::string{ "Too few arguments provided. Try \"help\" to know syntax\n" };
     }
     
-    std::string argCountMismatch(int currSize, int expectedSize){
+    inline std::string argCountMismatch(int currSize, int expectedSize){
         if(currSize < expectedSize){
             return tooFewArgumentsMessage();
         }
@@ -85,7 +85,7 @@ namespace DB{
 
 
 
-    std::string execute(std::string& command, std::shared_ptr<DB::PersistentTrie>& triePtr, shared_ptr<Users>& currentUser){
+    inline std::string execute(std::string& command, std::shared_ptr<DB::PersistentTrie>& triePtr, shared_ptr<Users>& currentUser){
 
 
 

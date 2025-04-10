@@ -6,7 +6,7 @@
 #include <optional>
 #include <random>
 #include <cassert>
-#include "Trie.hpp"
+#include "..\Trie.hpp"
 using namespace std;
 
 // Generate random lowercase string
@@ -22,7 +22,7 @@ std::string randomString(size_t length) {
 }
 
 void testTrieWithVersioning(size_t operations = 10000) {
-    DB::PersistentTrie trie;
+    DB::PersistentTrie trie{"db1", "bhanu"};
     std::unordered_map<std::string, std::string> reference;
     std::vector<std::unordered_map<std::string, std::string>> mapVersions;
     std::mt19937 rng(std::random_device{}());
