@@ -26,7 +26,7 @@ void testTrieWithVersioning(size_t operations = 10000) {
     std::unordered_map<std::string, std::string> reference;
     std::vector<std::unordered_map<std::string, std::string>> mapVersions;
     std::mt19937 rng(std::random_device{}());
-    std::uniform_int_distribution<int> opDist(0, 9); // 0-9 range (for controlling commit/restore probability)
+    std::uniform_int_distribution<int> opDist(0, 10); // 0-9 range (for controlling commit/restore probability)
 
     for (size_t i = 0; i < operations; ++i) {
         std::cout << i+1 << ") ";
@@ -57,7 +57,8 @@ void testTrieWithVersioning(size_t operations = 10000) {
             trie.commit();
             mapVersions.push_back(reference);
             std::cout << "[Commit] Version " << mapVersions.size() - 1 << " saved\n";
-        } else if (op == 9 && !mapVersions.empty()) {
+        } else if (op == 9) {
+            if(mapVersions.empty()) continue;
             // RESTORE (10% chance if versions exist)
             std::uniform_int_distribution<size_t> restoreDist(0, mapVersions.size() - 1);
             size_t version = restoreDist(rng);
@@ -66,6 +67,11 @@ void testTrieWithVersioning(size_t operations = 10000) {
             mapVersions.push_back(reference);
             reference = mapVersions[version];
             std::cout << "[Restore] Restored to version " << version << "\n";
+        }
+        else{
+            std::cout << "I'm saving and loading from the file.\n";
+            trie.saveTrie("SerialTrie.bin");
+            trie.loadTrieFromFile("SerialTrie.bin");
         }
 
         // Final check after each operation
