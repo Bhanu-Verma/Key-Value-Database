@@ -153,7 +153,7 @@ namespace DB{
                     triePtr = dbOpt;
                     return std::string {tokens[1] + " is active\r\n"};
                 } else {
-                    return std::string {"Database not found.\r\n"};
+                    return std::string {"Database not found\r\n"};
                 }
             }
             else{
@@ -207,7 +207,7 @@ namespace DB{
                     return std::string{"Key: " + tokens[1] + " removed successfully\r\n"};
                 }
                 else{
-                    return std::string { "key not found\n" };
+                    return std::string { "key not found\r\n" };
                 }
             }
             else{
@@ -216,10 +216,10 @@ namespace DB{
         }
         else if(tokens[0] == DB::getCommandName(DB::AllCommands::exists))
         {
-            if(triePtr == nullptr) return std::string {"Database not selected\n"};
+            if(triePtr == nullptr) return std::string {"Database not selected\r\n"};
 
             if(tokens.size() == 2){
-                return (triePtr->exists(tokens[1])? "true\n"s:"false\n"s);
+                return (triePtr->exists(tokens[1])? "true\r\n"s:"false\r\n"s);
             }
             else{
                 return argCountMismatch(static_cast<int>(tokens.size()), 2);
@@ -227,11 +227,11 @@ namespace DB{
         }
         else if(tokens[0] == DB::getCommandName(DB::AllCommands::set))
         {
-            if(triePtr == nullptr) return std::string {"Database not selected\n"};
+            if(triePtr == nullptr) return std::string {"Database not selected\r\n"};
 
             if(tokens.size() == 3){
                 triePtr->insert(tokens[1], tokens[2]);
-                return std::string{"Done\n"};
+                return std::string{"Done\r\n"};
             }
             else{
                 return argCountMismatch(static_cast<int>(tokens.size()), 3);
@@ -242,14 +242,14 @@ namespace DB{
         }
         else if(tokens[0] == DB::getCommandName(DB::AllCommands::commit)){
 
-            if(triePtr == nullptr) return std::string {"Database not selected\n"};
+            if(triePtr == nullptr) return std::string {"Database not selected\r\n"};
 
             int versionId = triePtr->commit();
-            return std::string{ "Version: "s + to_string(versionId) + " saved\n"s };
+            return std::string{ "Version: "s + to_string(versionId) + " saved\r\n"s };
         }
         else if(tokens[0] == DB::getCommandName(DB::AllCommands::restore)){
 
-            if(triePtr == nullptr) return std::string {"Database not selected\n"};
+            if(triePtr == nullptr) return std::string {"Database not selected\r\n"};
 
             if(tokens.size() == 2){
                 int versionId{};
@@ -257,21 +257,21 @@ namespace DB{
                     versionId = stoi(tokens[1]);
                 }
                 catch(...){
-                    return std::string{ "Not a valid version\n"s };
+                    return std::string{ "Not a valid version\r\n"s };
                 }   
                 bool response { triePtr->restore(versionId) };
                 if(response){
-                    return std::string{ "Restored version "s + to_string(versionId) + '\n'};
+                    return std::string{ "Restored version "s + to_string(versionId) + "\r\n"};
                 }
                 else{
-                    return "Unable to restore this version\n"s;
+                    return "Unable to restore this version\r\n"s;
                 }
             }
             else{
                 return argCountMismatch(static_cast<int>(tokens.size()), 2);
             }
         }
-        return std::string{"Unhandled or incomplete command\n"};
+        return std::string{"Unhandled or incomplete command\r\n"};
 
     }
 };
