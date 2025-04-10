@@ -13,6 +13,7 @@
 #include <shared_mutex>
 #include <fstream>
 #include <stack>
+#include <filesystem>
 using namespace std;
 
 namespace DB{
@@ -33,6 +34,7 @@ namespace DB{
         vector<shared_ptr<TrieNode>> versions;
         shared_ptr<TrieNode> currentRoot;
         mutable std::shared_mutex sh_mtx;
+        std::string filename{"SerialTrie.bin"};
 
 
         shared_ptr<TrieNode> insert(shared_ptr<TrieNode> node, const string &word, int index, const std::string& val) {
@@ -87,11 +89,36 @@ namespace DB{
             }
             return newNode;
         }
+
+        void loadStorage(std::string& s){
+            m_storage.clear();
+            for(int i{0}; i < s.size(); ++i){
+                std::string temp{};
+                while(i < s.size() && s[i] != '>'){
+                    temp.push_back(s[i]);
+                    ++i;
+                }
+                if(!(temp.empty())){
+                    m_storage.push_back(temp);
+                }
+            }
+        }
         
 
     public:
-        PersistentTrie() {
-            currentRoot = make_shared<TrieNode>();
+        PersistentTrie()
+        : currentRoot{make_shared<TrieNode>()}
+        {
+            if (std::filesystem::exists(filename)) {
+                std::ifstream fin(filename);
+                string s{};
+                fin >> s;
+                std::cout << "vector " << s << std::endl;
+                loadStorage(s);
+                fin >> s;
+                std::cout << "Trie " << s << std::endl;
+                currentRoot = deserializeTrie(s);
+            }
         }
 
         void insert(const string &word, const std::string& val) {
@@ -177,6 +204,7 @@ namespace DB{
                     }
                     assert(i < length && "Invalid serialized trie is passed");
                     st.top()->id = std::stoi(valueId);
+                    st.top()->isEndOfWord = true;
                 }else if(s[i] == '>'){
                     assert(!(st.empty()) && "Invalid serialized trie is passed");
                     st.pop();
