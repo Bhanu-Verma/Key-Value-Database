@@ -181,19 +181,22 @@ namespace DB
         void loadTrieFromFile(const std::string& filename){
             assert(std::filesystem::exists(filename) && "file doesn't exists");
             std::ifstream fin(filename);
-            string s{};
-            getline(fin, s);
+            string s_storage{}, s_nodePointers{}, s_trie{};
+            getline(fin, s_storage);
+            assert(!(fin.eof()) && "Invalid Trie in file");
+            getline(fin, s_nodePointers);
+            assert(!(fin.eof()) && "Invalid Trie in file");
+            getline(fin, s_trie);
+            assert((fin.eof()) && "Invalid Trie in file");
             // std::cout << "vector: " << s << std::endl;
-            loadStorage(s);
+            loadStorage(s_storage);
             // fin >> s;
-            getline(fin, s);
             // std::cout << "Nodes: " << s << std::endl;
             std::map<int, shared_ptr<TrieNode>> nodePointers;
-            loadNodePointers(s, nodePointers);
+            loadNodePointers(s_nodePointers, nodePointers);
             // fin >> s;
-            getline(fin, s);
             // std::cout << "Trie: " << s << std::endl;
-            versions = deserializeTrie(s, nodePointers);
+            versions = deserializeTrie(s_trie, nodePointers);
             if(!versions.empty()){
                 currentRoot = versions.back();
                 versions.pop_back();
@@ -365,7 +368,7 @@ namespace DB
                 trieString.push_back('>');
                 trieString.push_back('>');
                 trieString.push_back('>');
-                    assert(i && "Null ho gya hu main");
+                assert(i && "Null ho gya hu main");
                 trieString += to_string(i->m_id);
                 // std::cout << i->m_id << std::endl;
                 trieString.push_back(']');
