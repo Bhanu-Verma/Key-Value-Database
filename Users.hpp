@@ -100,7 +100,7 @@ namespace DB{
 
       std::string createDatabase(const std::string& dbName) {
 
-         if(allDatabases.find(dbName) != allDatabases.end()) return std::string {"Database already exists\n"};
+         if(allDatabases.find(dbName) != allDatabases.end()) return std::string {"Database already exists\r\n"};
 
          activeDatabases.emplace(dbName, std::make_shared<DB::PersistentTrie>(dbName, m_name));
          allDatabases.insert(dbName);
@@ -122,7 +122,7 @@ namespace DB{
          std::ofstream outFile(allDatabaseFileName);
          outFile << std::setw(4) << j << std::endl;
      
-         return std::string {"Database created successfully\n"};
+         return std::string {"Database created successfully\r\n"};
 
       }
 

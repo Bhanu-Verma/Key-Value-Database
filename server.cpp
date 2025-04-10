@@ -71,7 +71,7 @@ void handleClient(int newSocket) {
     
     close(newSocket);
 
-    // std::cout << "Client disconnected" << std::endl;
+    std::cout << "Client disconnected" << std::endl;
     // delete db;
     // db = nullptr;
 }
