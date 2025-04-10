@@ -1,9 +1,22 @@
 {
+    "alice": [
+        "db1"
+    ],
     "babloo": [
         "db"
     ],
     "bhanu": [
         "db",
+        "db1",
+        "db4"
+    ],
+    "bhanu1": [
+        "db1"
+    ],
+    "bob2": [
+        "db1"
+    ],
+    "john": [
         "db1"
     ],
     "pikachu": [

@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++17 -I"./"
+CXXFLAGS = -std=c++20 -I"./"
 
 SRC = server.cpp
 

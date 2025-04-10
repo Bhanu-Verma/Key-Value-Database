@@ -41,6 +41,7 @@ namespace DB{
 
       std::string m_name{};
 
+
       Users(std::string name, std::string password)
       : m_name{name}
       , m_password{password}

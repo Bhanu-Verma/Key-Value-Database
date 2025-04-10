@@ -45,13 +45,14 @@ namespace DB{
     }
     
     // Prints all available commands
-    std::string showAllCommands(){
-        return std::string {"1) exit\r\n2) get <key>\r\n3) del <key>\r\n4) exists <key>\r\n5) set <key> <value>\r\n6) commit\r\n7) restore <version_id>\r\n8) help\r\n9) create_database <db_name>\r\n10) use_database <db_name>\r\n11) authenticate <user_name> <password>\r\n12) create_user <user_name> <password>\r\n13) save_database <db_name>\r\n14) list_databases\r\n" };
+    inline std::string showAllCommands(){
+        return std::string {"1) exit\r\n2) get <key>\r\n3) del <key>\r\n4) exists <key>\r\n5) set <key> <value>\r\n6) commit\r\n7) restore <version_id>\r\n8) help\r\n9) create_database <db_name>\r\n10) use_database <db_name>\r\n11) authenticate <user_name> <password>\r\n12) create_user <user_name> <password>\r\n13) save_database\r\n14) list_databases\r\n" };
     }
 
     /**
      * Checks if the first word of the command is valid
-     */
+    */
+
     inline bool isCommandValid(const std::string command){
 
         size_t pos = command.find_first_of(" \n");
@@ -133,13 +134,13 @@ namespace DB{
             if(currentUser == nullptr) return std::string {"User not authenticated\r\n"};
             if(triePtr == nullptr) return std::string {"Database not selected\r\n"};
 
-            if(tokens.size() == 2){
+            if(tokens.size() == 1){
                 std::string fileName { "./Server-Data/Data/" + currentUser->m_name + '_' + triePtr->m_name + ".db" };
                 triePtr->saveTrie(fileName);
                 return std::string {"Database saved successfully\r\n"};
             }
             else{
-                return argCountMismatch(static_cast<int>(tokens.size()), 2);
+                return argCountMismatch(static_cast<int>(tokens.size()), 1);
             }
         }
         else if(tokens[0] == DB::getCommandName(DB::AllCommands::use_database)){
