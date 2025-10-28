@@ -63,12 +63,12 @@ namespace DB
                 newNode->index = m_storage.size() - 1;
                 return newNode;
             }
-            if(word=="ct" && index==1){
-                std::cout << "printing map:\n";
-                for(auto p: newNode->children){
-                    std::cout << p.first << ' ' << p.second << '\n';
-                }
-            }
+            // if(word=="ct" && index==1){
+            //     std::cout << "printing map:\n";
+            //     for(auto p: newNode->children){
+            //         std::cout << p.first << ' ' << p.second << '\n';
+            //     }
+            // }
             char ch = word[index];
             auto inserted = insert(node->children[ch], word, index + 1, val);
             assert(inserted && "insert returned null");
@@ -112,7 +112,7 @@ namespace DB
 
             char ch = key[index];
             if(newNode->children.find(ch) == newNode->children.end()){
-                std::cout << "char " << ch << " not present in children map\n";
+                // std::cout << "char " << ch << " not present in children map\n";
                 return newNode;
             }
             auto removed = remove(newNode->children[ch], key, index + 1);

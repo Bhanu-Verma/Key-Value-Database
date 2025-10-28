@@ -9,11 +9,13 @@
 #include <iostream>
 #include <mutex>
 #include <set>
-#include <nlohmann/json.hpp>
 #include <filesystem>
 #include <fstream>
+#include "json.hpp"
 namespace fs = std::filesystem;
 using json = nlohmann::json;
+
+
 namespace DB{
    inline std::mutex userMutex;
    inline std::mutex concurrentMutex;
@@ -67,13 +69,15 @@ namespace DB{
 
       bool authenticatePassword(const std::string& password){
          return m_password == password;
-         //  apply a decryptor here
       }
 
       std::string listDatabases(){
          std::string response{};
          for(auto db : allDatabases){
             response += db + "\r\n";
+         }
+         if(response==""){
+            response = "No databases found.\r\n";
          }
          return response;
       }

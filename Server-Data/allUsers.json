@@ -1,6 +1,21 @@
 {
     "Users": [
-        
+        {
+            "password": "123",
+            "userName": "bhanu"
+        },
+        {
+            "password": "123",
+            "userName": "vishnu"
+        },
+        {
+            "password": "123",
+            "userName": "kk"
+        },
+        {
+            "password": "123",
+            "userName": "don"
+        }
     ],
-    "totalUsers": 0
+    "totalUsers": 4
 }

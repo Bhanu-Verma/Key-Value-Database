@@ -31,7 +31,8 @@ namespace DB{
         create_user,
         save_database,
         list_databases,
-        maxCommands,
+        // Add new commands here
+        maxCommands,        // Number of commands
     };
     
     // Stores all the valid command
@@ -49,23 +50,20 @@ namespace DB{
         return std::string {"1) exit\r\n2) get <key>\r\n3) del <key>\r\n4) exists <key>\r\n5) set <key> <value>\r\n6) commit\r\n7) restore <version_id>\r\n8) help\r\n9) create_database <db_name>\r\n10) use_database <db_name>\r\n11) authenticate <user_name> <password>\r\n12) create_user <user_name> <password>\r\n13) save_database\r\n14) list_databases\r\n" };
     }
 
+    
+
     /**
      * Checks if the first word of the command is valid
     */
-
     inline bool isCommandValid(const std::string command){
-
         size_t pos = command.find_first_of(" \n");
         std::string prefix = (pos == std::string::npos) ? command : command.substr(0, pos);
-
-        // std::cout << "prefix " << prefix << '\n';
 
         for(auto& ch : prefix){
             ch = std::tolower(ch);
         }
 
         return std::find(DB::validCommands.begin(), DB::validCommands.end(), prefix) != DB::validCommands.end();
-
     }
 
     inline std::string tooManyArgumentsMessage(){
@@ -86,11 +84,7 @@ namespace DB{
     }
 
 
-
     inline std::string execute(std::string& command, std::shared_ptr<DB::PersistentTrie>& triePtr, shared_ptr<Users>& currentUser){
-
-
-
         // just to remove trailing '\r' or '\n' characters
         while (!command.empty() && (command.back() == '\n' || command.back() == '\r')) {
             command.pop_back();
@@ -100,22 +94,17 @@ namespace DB{
             return std::string{"Not a valid command\r\n.Try \"help\" to list all available commands\r\n"};
         }
 
-        // std::cout << "yes\n";
-
         std::vector<std::string> tokens { DB::parse(command) };
 
         if(tokens[0] == DB::getCommandName(DB::AllCommands::create_user)){
-
             if(tokens.size() == 3){
                 std::string userName = tokens[1];
                 std::string passward = tokens[2];
 
-                if(DB::registerUser(userName, passward))return std::string {"Registered Successfully\r\n"};
+                if(DB::registerUser(userName, passward)) return std::string {"Registered Successfully\r\n"};
                 else return std::string {"Registration Failed\r\n"};
             }
             else return argCountMismatch(static_cast<int>(tokens.size()), 3);
-
-
         }
         else if(tokens[0] == DB::getCommandName(DB::AllCommands::authenticate)){
             
@@ -132,7 +121,6 @@ namespace DB{
 
         }
         else if(tokens[0] == DB::getCommandName(DB::AllCommands::save_database)){
-
             if(currentUser == nullptr) return std::string {"User not authenticated\r\n"};
             if(triePtr == nullptr) return std::string {"Database not selected\r\n"};
 
@@ -146,9 +134,7 @@ namespace DB{
             }
         }
         else if(tokens[0] == DB::getCommandName(DB::AllCommands::use_database)){
-
-            // delete triePtr;
-            // triePtr = nullptr;
+            if(currentUser == nullptr) return std::string {"User not authenticated\r\n"};
 
             if(tokens.size() == 2){
                 auto dbOpt = currentUser->getDatabase(tokens[1]);
@@ -165,6 +151,7 @@ namespace DB{
 
         }
         else if(tokens[0] == DB::getCommandName(DB::AllCommands::create_database)){
+            if(currentUser == nullptr) return std::string {"User not authenticated\r\n"};
 
             if(tokens.size() == 2){
                 return currentUser->createDatabase(tokens[1]);
@@ -175,6 +162,9 @@ namespace DB{
 
         }
         else if(tokens[0] == DB::getCommandName(DB::AllCommands::list_databases)){
+            if(currentUser == nullptr){
+                return std::string {"User not authenticated\r\n"};
+            }
 
             if(tokens.size() == 1){
                 return currentUser->listDatabases();
@@ -190,6 +180,7 @@ namespace DB{
         }
         else if(tokens[0] == DB::getCommandName(DB::AllCommands::get))  
         {
+            if(currentUser == nullptr) return std::string {"User not authenticated\r\n"};
             if(triePtr == nullptr) return std::string {"Database not selected\r\n"};
             
             if(tokens.size() == 2){
@@ -202,6 +193,7 @@ namespace DB{
         }
         else if(tokens[0] == DB::getCommandName(DB::AllCommands::del))
         {
+            if(currentUser == nullptr) return std::string {"User not authenticated\r\n"};
             if(triePtr == nullptr) return std::string {"Database not selected\r\n"};
 
             if(tokens.size() == 2){
@@ -219,6 +211,7 @@ namespace DB{
         }
         else if(tokens[0] == DB::getCommandName(DB::AllCommands::exists))
         {
+            if(currentUser == nullptr) return std::string {"User not authenticated\r\n"};
             if(triePtr == nullptr) return std::string {"Database not selected\r\n"};
 
             if(tokens.size() == 2){
@@ -230,6 +223,7 @@ namespace DB{
         }
         else if(tokens[0] == DB::getCommandName(DB::AllCommands::set))
         {
+            if(currentUser == nullptr) return std::string {"User not authenticated\r\n"};
             if(triePtr == nullptr) return std::string {"Database not selected\r\n"};
 
             if(tokens.size() == 3){
@@ -244,14 +238,14 @@ namespace DB{
             return showAllCommands();
         }
         else if(tokens[0] == DB::getCommandName(DB::AllCommands::commit)){
-
+            if(currentUser == nullptr) return std::string {"User not authenticated\r\n"};
             if(triePtr == nullptr) return std::string {"Database not selected\r\n"};
 
             int versionId = triePtr->commit();
             return std::string{ "Version: "s + to_string(versionId) + " saved\r\n"s };
         }
         else if(tokens[0] == DB::getCommandName(DB::AllCommands::restore)){
-
+            if(currentUser == nullptr) return std::string {"User not authenticated\r\n"};
             if(triePtr == nullptr) return std::string {"Database not selected\r\n"};
 
             if(tokens.size() == 2){

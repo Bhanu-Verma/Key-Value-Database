@@ -9,6 +9,9 @@
 
 namespace DB{
     inline std::vector<std::string> parse(const std::string& command){
+        if(command.empty()){
+            return std::vector<std::string>();
+        }
         std::stringstream commandStream{ command };
         std::vector<std::string> result{};
         std::string curr{};
